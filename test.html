@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>test--yep</title>
+    <style>
+
+    </style>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js">
+    </script>
+    <script>
+    (function(window, document, $, undefined) {
+
+        $.fn.highlight = function(options, params) {
+            if (typeof options == 'string') {
+                var method = methods[options];
+                if (method) {
+                    return method(this, params)
+                }
+            }
+            var _options = this.data('highlight');
+            if (_options) {
+                $.extend(_options, options);
+            } else {
+                _options = $.extend(true, {}, $.fn.highlight.defaults, options);
+                this.data('highlight', _options)
+            }
+            this.find('tr').unbind('mouseenter').mouseenter(function(event) {
+                var row = $(event.target).parents('tr');
+                var originalStyle = {
+                    background: row.css('background'),
+                    color: row.css('color')
+                }
+                row.data('originalStyle', originalStyle);
+                $(row).css({
+                    background: _options.background,
+                    color: _options.color
+                })
+                _options.onEnterRow(row);
+            }).unbind('mouseleave').mouseleave(function(event) {
+                var row = $(event.target).parents('tr');
+                var originalStyle = row.data('originalStyle')
+                $(row).css(originalStyle)
+                _options.onLeavRow(row)
+            });;
+        };
+
+        // 方法
+        var methods = {
+            setBackgroundColor: function(target, color) {
+                var options = $(target).data('highlight');
+                options.background = color;
+            },
+            setForegroundColor: function(target, color) {
+                var options = $(target).data('highlight');
+                options.color = color;
+            },
+            destroy: function(target) {
+                $(target).css({
+                    color: $.fn.highlight.defaults.color,
+                    background: $.fn.highlight.defaults.background
+                });
+                $(target).find('tr').unbind('mouseleave').unbind('mouseenter');
+                $(target).data('highlight', null)
+            }
+
+        }
+
+        $.fn.highlight.defaults = {
+            color: 'black',
+            background: 'white',
+            onEnterRow: $.noop(),
+            onLeavRow: $.noop()
+        };
+
+    })(window, document, jQuery);
+
+    $(function() {
+        $('table').highlight({
+            color: 'white',
+            background: 'blue',
+            onEnterRow: function(row) {
+                console.log(row)
+            },
+            onLeavRow: function(row) {
+                console.log('鼠标移出')
+            }
+        })
+        $('button#changeColor').click(function() {
+            $('table').highlight('setBackgroundColor', 'yellow');
+        })
+        $('button#destroy').click(function() {
+            $('table').highlight('destroy');
+        })
+        $('button#init').click(function() {
+            $('table').highlight({
+                color: 'white',
+                background: 'blue',
+                onEnterRow: function(row) {
+                    console.log(row)
+                },
+                onLeavRow: function(row) {
+                    console.log('鼠标移出')
+                }
+            });
+        })
+    })
+    </script>
+</head>
+
+<body>
+    <div style="width: 400;height: 100px">
+        <table style="border-collapse: collapse; border-spacing: 0;width: 100%; margin-top: 8px;">
+            <tr style="width:400px;color: #000;background: #eee">
+                <td style="border: 1px solid silver;">1</td>
+                <td style="border: 1px solid silver;">1.1</td>
+            </tr>
+            <tr style="width:400px">
+                <td style="border: 1px solid silver;">2</td>
+                <td style="border: 1px solid silver;">2.1</td>
+            </tr>
+            <tr style="width:400px;color: #000;background: #eee">
+                <td style="border: 1px solid silver;">3</td>
+                <td style="border: 1px solid silver;">3.1</td>
+            </tr>
+        </table>
+    </div>
+    <button id="changeColor">变黄色</button>
+    <button id="destroy">销毁</button>
+    <button id="init">重新初始化</button>
+</body>
+
+</html>
